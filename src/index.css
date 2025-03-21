@@ -1,39 +1,39 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-    @font-face {
-        font-family: "Terminus";
-        src: url("/fonts/terminus-regular.ttf") format("truetype");
-        font-weight: 600;
-        font-style: normal;
-    }
+  @font-face {
+    font-family: 'Terminus';
+    src: url('/fonts/terminus-regular.ttf') format('truetype');
+    font-weight: 600;
+    font-style: normal;
+  }
 
-    @font-face {
-        font-family: "Terminus";
-        src: url("/fonts/terminus-bold.ttf") format("truetype");
-        font-weight: 900;
-        font-style: normal;
-    }
+  @font-face {
+    font-family: 'Terminus';
+    src: url('/fonts/terminus-bold.ttf') format('truetype');
+    font-weight: 900;
+    font-style: normal;
+  }
 
-    @font-face {
-        font-family: "Terminus";
-        src: url("/fonts/terminus-italic.ttf") format("truetype");
-        font-weight: 500;
-        font-style: italic;
-    }
+  @font-face {
+    font-family: 'Terminus';
+    src: url('/fonts/terminus-italic.ttf') format('truetype');
+    font-weight: 500;
+    font-style: italic;
+  }
 
-    @font-face {
-        font-family: "Terminus";
-        src: url("/fonts/terminus-bold-italic.ttf") format("truetype");
-        font-weight: 800;
-        font-style: italic;
-    }
+  @font-face {
+    font-family: 'Terminus';
+    src: url('/fonts/terminus-bold-italic.ttf') format('truetype');
+    font-weight: 800;
+    font-style: italic;
+  }
 }
 
 body {
-    font-family: "Terminus", monospace;
+  font-family: 'Terminus', monospace;
 }
