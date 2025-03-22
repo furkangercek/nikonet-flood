@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const randomColors = [
@@ -12,6 +12,7 @@ const randomColors = [
 
 const OneShotBoot = ({ onComplete }) => {
   const [bootPhase, setBootPhase] = useState(0);
+  const [activeGlitches, setActiveGlitches] = useState<number[]>([]);
 
   useEffect(() => {
     const initialLoadTimeout = setTimeout(() => {
@@ -48,6 +49,50 @@ const OneShotBoot = ({ onComplete }) => {
       timeoutIds.forEach((id) => clearTimeout(id));
     };
   }, []);
+
+  // Fixed glitch appearance system with guaranteed glitches
+  useEffect(() => {
+    if (bootPhase < 2) return; // Only start glitches after boot phase 2
+
+    const totalGlitches = 80;
+
+    // Function to activate a new set of glitches
+    const activateNewGlitches = () => {
+      // Always activate 1-3 glitches
+      const numToActivate = Math.floor(Math.random() * 3) + 1;
+
+      // Generate new random glitches
+      const newActiveGlitches = [];
+      for (let i = 0; i < numToActivate; i++) {
+        const glitchId = Math.floor(Math.random() * totalGlitches);
+        if (!newActiveGlitches.includes(glitchId)) {
+          newActiveGlitches.push(glitchId);
+        }
+      }
+
+      // Update state with new active glitches
+      setActiveGlitches(newActiveGlitches);
+    };
+
+    // Initial activation after a short delay
+    const initialActivation = setTimeout(() => {
+      activateNewGlitches();
+    }, 1000);
+
+    // Set up interval for regular glitch updates
+    // Using a reasonable interval (3-6 seconds) that's slow but visible
+    const glitchInterval = setInterval(
+      () => {
+        activateNewGlitches();
+      },
+      Math.random() * 3000 + 3000,
+    );
+
+    return () => {
+      clearTimeout(initialActivation);
+      clearInterval(glitchInterval);
+    };
+  }, [bootPhase]);
 
   // TODO: maybe export this elsewhere later.
   const bootLines = [
@@ -105,22 +150,61 @@ const OneShotBoot = ({ onComplete }) => {
     }
   };
 
-  const terminalGlitches = useMemo(
-    () =>
-      [...Array(80)].map((_, i) => ({
-        id: i, //uuid
-        size: `${Math.random() * 15}px`,
-        top: `${Math.random() * 100}%`,
-        left: `${Math.random() * 100}%`,
-        color: randomColors[Math.floor(Math.random() * 6)],
-        delay: 1,
-      })),
-    [],
-  );
-  // Generate square glitches for the terminal
+  // Generate all possible glitches once
+  const terminalGlitches = [...Array(80)].map((_, i) => ({
+    id: i,
+    size: `${Math.random() * 18}px`,
+    top: `${Math.random() * 100}%`,
+    left: `${Math.random() * 100}%`,
+    color: randomColors[Math.floor(Math.random() * randomColors.length)],
+  }));
+
+  // Text glitch state
+  const [activeTextGlitchIndex, setActiveTextGlitchIndex] = useState<
+    number | null
+  >(null);
+
+  // Effect for text glitches
+  useEffect(() => {
+    if (bootPhase <= 3) return;
+
+    // Function to maybe show a text glitch
+    const maybeShowTextGlitch = () => {
+      // 40% chance to show a text glitch
+      if (Math.random() < 0.4) {
+        setActiveTextGlitchIndex(Math.floor(Math.random() * 5));
+
+        // Hide it after 1-2 seconds
+        setTimeout(
+          () => {
+            setActiveTextGlitchIndex(null);
+          },
+          Math.random() * 1000 + 1000,
+        );
+      } else {
+        setActiveTextGlitchIndex(null);
+      }
+    };
+
+    // Set up interval for checking text glitches
+    const textGlitchInterval = setInterval(
+      () => {
+        maybeShowTextGlitch();
+      },
+      Math.random() * 4000 + 4000,
+    ); // Every 4-8 seconds
+
+    // Initial check
+    const initialTextCheck = setTimeout(maybeShowTextGlitch, 2000);
+
+    return () => {
+      clearInterval(textGlitchInterval);
+      clearTimeout(initialTextCheck);
+    };
+  }, [bootPhase]);
 
   return (
-    <div className="bg-gray-900 min-h-screen flex items-start justify-center font-terminus relative overflow-hidden pt-[30vh]">
+    <div className="bg-gray-900 min-h-screen flex items-start justify-center font-terminus relative overflow-hidden pt-[35vh]">
       <AnimatePresence>
         {bootPhase === 0 && (
           <motion.div
@@ -170,30 +254,42 @@ const OneShotBoot = ({ onComplete }) => {
             transition={{ duration: 0.8, ease: 'easeOut' }}
             layout
           >
-            {/* Need to make these glitches appear slower. Maybe not map over array.*/}
-            {terminalGlitches.map((glitch) => (
-              <motion.div
-                key={`terminal-glitch-${glitch.id}`}
-                className={`absolute ${glitch.color} z-20`}
-                style={{
-                  top: glitch.top,
-                  left: glitch.left,
-                  width: glitch.size,
-                  height: glitch.size,
-                }}
-                animate={{
-                  opacity: [0, 0.7, 0],
-                  x: [0, Math.random() * 5 - 2.5],
-                  y: [0, Math.random() * 5 - 2.5],
-                }}
-                transition={{
-                  duration: 0.2,
-                  repeat: Infinity,
-                  repeatType: 'mirror',
-                  repeatDelay: glitch.delay,
-                }}
-              />
-            ))}
+            {/* Square glitches with guaranteed appearance */}
+            {terminalGlitches.map((glitch) => {
+              const randomX = Math.random() * 2;
+              const randomY = Math.random() * 2;
+              const isActive = activeGlitches.includes(glitch.id);
+
+              return (
+                <motion.div
+                  key={`terminal-glitch-${glitch.id}`}
+                  className={`absolute ${glitch.color}`}
+                  style={{
+                    top: glitch.top,
+                    left: glitch.left,
+                    width: glitch.size,
+                    height: glitch.size,
+                  }}
+                  initial={{ opacity: 0 }}
+                  animate={
+                    isActive
+                      ? {
+                          opacity: [0, 0.7, 0],
+                          x: [0, randomX, 0],
+                          y: [0, randomY, 0],
+                        }
+                      : { opacity: 0 }
+                  }
+                  transition={
+                    isActive
+                      ? {
+                          duration: 0.5,
+                        }
+                      : { duration: 0 }
+                  }
+                />
+              );
+            })}
 
             <div className="flex items-center justify-between mb-4">
               <div className="flex space-x-2">
@@ -204,31 +300,37 @@ const OneShotBoot = ({ onComplete }) => {
               <div className="text-xs text-gray-500">WorldMachine.exe</div>
             </div>
 
-            {/** These do not appear in random spots? */}
-            <AnimatePresence>
-              {bootPhase > 3 &&
-                [...Array(5)].map((_, i) => (
-                  <motion.div
-                    key={`text-glitch-${i}`}
-                    className="absolute text-pink-500 z-30 text-opacity-70 overflow-hidden whitespace-nowrap font-terminus"
-                    initial={{ opacity: 0 }}
-                    animate={{
-                      opacity: [0, 0.8, 0],
-                      x: [0, Math.random() * 15 - 2.5],
-                    }}
-                    exit={{ opacity: 0 }}
-                    transition={{
-                      duration: 0.15,
-                      repeat: Infinity,
-                      repeatDelay: Math.random() * 8 + 2,
-                    }}
-                  >
-                    {Math.random() > 0.5
-                      ? 'ERR://SYSTEM.FAULT'
-                      : 'DATA://CORRUPT.0x8F'}
-                  </motion.div>
-                ))}
-            </AnimatePresence>
+            {/* Text glitches */}
+            {[...Array(5)].map((_, i) => {
+              const isActive = activeTextGlitchIndex === i;
+              const top = `${Math.random() * 80 + 10}%`;
+              const left = `${Math.random() * 80 + 10}%`;
+
+              return (
+                <motion.div
+                  key={`text-glitch-${i}`}
+                  className="absolute text-pink-500 z-30 text-opacity-70 overflow-hidden whitespace-nowrap font-terminus"
+                  style={{ top, left }}
+                  initial={{ opacity: 0 }}
+                  animate={
+                    isActive
+                      ? {
+                          opacity: [0, 0.8, 0],
+                          x: [0, Math.random() * 10 - 5],
+                        }
+                      : { opacity: 0 }
+                  }
+                  transition={{
+                    duration: 2,
+                    ease: 'easeInOut',
+                  }}
+                >
+                  {Math.random() > 0.5
+                    ? 'ERR://SYSTEM.FAULT'
+                    : 'DATA://CORRUPT.0x8F'}
+                </motion.div>
+              );
+            })}
 
             <div className="space-y-2 mb-6 relative">
               <AnimatePresence>
