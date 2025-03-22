@@ -205,6 +205,84 @@ const OneShotBoot = ({ onComplete }) => {
 
   return (
     <div className="bg-gray-900 min-h-screen flex items-start justify-center font-terminus relative overflow-hidden pt-[35vh]">
+      {/* Glitchy Background */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        {/* Scan Lines with a Subtle Purple Tint */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundSize: '100% 3px',
+            backgroundImage:
+              'linear-gradient(to bottom, rgba(150, 50, 200, 0.1) 1px, transparent 1px)',
+            opacity: 0.4,
+          }}
+        ></div>
+
+        {/* Noise Overlay with a Purple Hue */}
+        <motion.div
+          className="absolute inset-0 pointer-events-none mix-blend-overlay"
+          style={{
+            backgroundImage:
+              "url('https://www.transparenttextures.com/patterns/asfalt-light.png')",
+            filter: 'hue-rotate(290deg)', // Gives it a purple tint
+          }}
+          animate={{ opacity: [0.1, 0.3, 0.1] }}
+          transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}
+        ></motion.div>
+
+        {/* Randomized Flickering Glitches */}
+        {[...Array(5)].map((_, i) => {
+          const randomX = Math.random() * 100;
+          const randomY = Math.random() * 100;
+          const randomWidth = Math.random() * 15 + 5;
+          const randomHeight = Math.random() * 20 + 10;
+
+          return (
+            <motion.div
+              key={`glitch-${i}`}
+              className="absolute bg-purple-500"
+              style={{
+                top: `${randomY}%`,
+                left: `${randomX}%`,
+                width: `${randomWidth}px`,
+                height: `${randomHeight}px`,
+                opacity: 0.7,
+              }}
+              initial={{ opacity: 0 }}
+              animate={{
+                opacity: [0, 1, 0],
+                x: [0, Math.random() * 5 - 2.5, 0], // Random subtle jitter
+                y: [0, Math.random() * 5 - 2.5, 0],
+              }}
+              transition={{
+                duration: Math.random() * 0.5 + 0.2,
+                repeat: Infinity,
+                repeatDelay: Math.random() * 2 + 1,
+                ease: 'linear',
+              }}
+            />
+          );
+        })}
+
+        {/* Pixelation Effects */}
+        <motion.div
+          className="absolute inset-0 mix-blend-hard-light pointer-events-none"
+          style={{
+            backgroundImage:
+              'repeating-linear-gradient(0deg, rgba(10, 6, 10, 0.05) 0px, rgba(154, 15, 209, 0.05) 1px, transparent 1px, transparent 4px)',
+            backgroundSize: '100% 5px',
+          }}
+          animate={{
+            opacity: [0.1, 0.4, 0.1],
+            filter: ['contrast(120%)', 'contrast(80%)', 'contrast(120%)'],
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+        ></motion.div>
+      </div>
       <AnimatePresence>
         {bootPhase === 0 && (
           <motion.div
